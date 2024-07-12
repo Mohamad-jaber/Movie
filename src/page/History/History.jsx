@@ -17,13 +17,13 @@ const History = () => {
 
     return (
         <Container>
-            <Typography variant="h4" component="div" gutterBottom>
+            <Typography variant="h4" component="div" gutterBottom sx={{ marginTop: "50px" }}>
                 Movie History
             </Typography>
             <List>
-                {history.map((movie) => (
+                {history.map((movie, index) => (
                     <ListItem button key={movie.id} onClick={() => handleItemClick(movie.id)}>
-                        <ListItemText primary={movie.name} />
+                        <ListItemText primary={`${index + 1}. ${movie.name}`} />
                     </ListItem>
                 ))}
             </List>

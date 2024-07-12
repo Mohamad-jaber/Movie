@@ -13,6 +13,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
+import History from './../../page/History/History';
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
@@ -84,9 +85,16 @@ const PrimarySearchAppBar = () => {
         setAnchorEl(null);
     };
 
-    const handleMenuItemClick = (id) => {
+    const handleMenuItemClick = (id,title) => {
         setAnchorEl(null);
         setSearchQuery("")
+        const storedHistory = JSON.parse(localStorage.getItem('history')) || [];
+        const movieEntry = { id, name: title };
+        const isDuplicate = storedHistory.some(entry => entry.id === id);
+        if (!isDuplicate) {
+            storedHistory.push(movieEntry);
+            localStorage.setItem('history', JSON.stringify(storedHistory));
+        }
         navigate(`/details?MovieId=${id}`);
     };
 
@@ -120,6 +128,9 @@ const PrimarySearchAppBar = () => {
                         Search
                     </Button>
                     <Box sx={{ flexGrow: 1 }} />
+                    <Button color="inherit" onClick={() => navigate('/history')}>
+                        History
+                    </Button>
                     <Button color="inherit" onClick={() => navigate('/favorite')}>
                         Favorites
                     </Button>
@@ -146,7 +157,7 @@ const PrimarySearchAppBar = () => {
                 }}
             >
                 {results.map((result) => (
-                    <MenuItem key={result.id} onClick={() => handleMenuItemClick(result.id)}>
+                    <MenuItem key={result.id} onClick={() => handleMenuItemClick(result.id , result.original_title)}>
                         {result.original_title}
                     </MenuItem>
                 ))}

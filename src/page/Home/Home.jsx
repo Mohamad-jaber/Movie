@@ -5,11 +5,9 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import useGetMoviesAPI from './hooks/useGetMoviesAPI';
 
 const Home = () => {
-    const { Movies, isFetching } = useGetMoviesAPI();
+    const { Movies } = useGetMoviesAPI();
     const navigate = useNavigate();
     const [favorites, setFavorites] = useState(JSON.parse(localStorage.getItem('favoriteMovies')));
-
-    
 
     // Save favorites to local storage whenever the favorites state changes
     useEffect(() => {
@@ -29,16 +27,23 @@ const Home = () => {
         });
     };
 
-    const handleCardClick = (id) => {
+    const handleCardClick = (id, title) => {
+        const storedHistory = JSON.parse(localStorage.getItem('history')) || [];
+        const movieEntry = { id, name: title };
+        const isDuplicate = storedHistory.some(entry => entry.id === id);
+        if (!isDuplicate) {
+            storedHistory.push(movieEntry);
+            localStorage.setItem('history', JSON.stringify(storedHistory));
+        }
         navigate(`/details?MovieId=${id}`);
     };
 
     const renderItems = (items) => {
         return items.map((item, index) => (
             <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
-                <Card 
+                <Card
                     sx={{ height: '100%', display: 'flex', flexDirection: 'column', cursor: 'pointer' }}
-                    onClick={() => handleCardClick(item.id)}
+                    onClick={() => handleCardClick(item.id, item.original_title)}
                 >
                     <CardMedia
                         component="img"
@@ -73,7 +78,7 @@ const Home = () => {
 
     return (
         <Container>
-            <Typography variant="h4" gutterBottom sx={{marginTop:"50px"}}>
+            <Typography variant="h4" gutterBottom sx={{ marginTop: "50px" }}>
                 Trending Movies
             </Typography>
             <Grid container spacing={2}>

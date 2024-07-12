@@ -19,16 +19,6 @@ const MovieDetails = () => {
         refetch();
     }, [urlMovieId, location.search]);  // Add location.search to dependencies
 
-    useEffect(() => {
-        if (urlMovieId !== -1 && Movie?.original_title) {
-            const storedHistory = JSON.parse(localStorage.getItem('history')) || [];
-            const movieEntry = { id: urlMovieId, name: Movie.original_title };
-            if (!storedHistory.some(entry => entry.id === urlMovieId)) {
-                storedHistory.push(movieEntry);
-                localStorage.setItem('history', JSON.stringify(storedHistory));
-            }
-        }
-    }, [Movie]);
 
     if (isFetching) return <BlockUI />
 
