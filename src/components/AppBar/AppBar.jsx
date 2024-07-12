@@ -13,7 +13,9 @@ import SearchIcon from '@mui/icons-material/Search';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
-import History from './../../page/History/History';
+import MenuIcon from '@mui/icons-material/Menu';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
@@ -45,7 +47,6 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
     color: 'inherit',
     '& .MuiInputBase-input': {
         padding: theme.spacing(1, 1, 1, 0),
-        // vertical padding + font size from searchIcon
         paddingLeft: `calc(1em + ${theme.spacing(4)})`,
         transition: theme.transitions.create('width'),
         width: '100%',
@@ -59,7 +60,10 @@ const PrimarySearchAppBar = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [results, setResults] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
+    const [mobileMenuAnchorEl, setMobileMenuAnchorEl] = useState(null);
     const navigate = useNavigate();
+    const theme = useTheme();
+    const isTabletOrLess = useMediaQuery(theme.breakpoints.down('md'));
 
     const handleSearch = () => {
         if (searchQuery.length > 0) {
@@ -85,9 +89,7 @@ const PrimarySearchAppBar = () => {
         setAnchorEl(null);
     };
 
-    const handleMenuItemClick = (id,title) => {
-        setAnchorEl(null);
-        setSearchQuery("")
+    const handleMenuItemClick = (id, title) => {
         const storedHistory = JSON.parse(localStorage.getItem('history')) || [];
         const movieEntry = { id, name: title };
         const isDuplicate = storedHistory.some(entry => entry.id === id);
@@ -95,7 +97,17 @@ const PrimarySearchAppBar = () => {
             storedHistory.push(movieEntry);
             localStorage.setItem('history', JSON.stringify(storedHistory));
         }
+        setAnchorEl(null);
+        setSearchQuery("");
         navigate(`/details?MovieId=${id}`);
+    };
+
+    const handleMobileMenuOpen = (event) => {
+        setMobileMenuAnchorEl(event.currentTarget);
+    };
+
+    const handleMobileMenuClose = () => {
+        setMobileMenuAnchorEl(null);
     };
 
     return (
@@ -106,12 +118,10 @@ const PrimarySearchAppBar = () => {
                         variant="h6"
                         noWrap
                         component="div"
-                        sx={{ display: { xs: 'none', sm: 'block' } }}
-                        onClick={()=>navigate("/movies")}
+                        onClick={() => navigate("/movies")}
                     >
                         Movies
                     </Typography>
-                    <Box sx={{ flexGrow: 1 }} />
                     <Search>
                         <SearchIconWrapper>
                             <SearchIcon />
@@ -124,28 +134,53 @@ const PrimarySearchAppBar = () => {
                             onChange={handleSearchChange}
                         />
                     </Search>
-                    <Button variant="contained" sx={{backgroundColor:"white" , color:"black"}} onClick={handleSearch}>
+                    <Button variant="contained" sx={{ backgroundColor: "white", color: "black" }} onClick={handleSearch}>
                         Search
                     </Button>
                     <Box sx={{ flexGrow: 1 }} />
-                    <Button color="inherit" onClick={() => navigate('/history')}>
-                        History
-                    </Button>
-                    <Button color="inherit" onClick={() => navigate('/favorite')}>
-                        Favorites
-                    </Button>
-                    <Box>
-                        <IconButton
-                            size="large"
-                            edge="end"
-                            aria-label="account of current user"
-                            aria-haspopup="true"
-                            color="inherit"
-                            onClick={()=>{navigate('/profile')}}
-                        >
-                            <AccountCircle />
-                        </IconButton>
-                    </Box>
+                    {isTabletOrLess ? (
+                        <Box>
+                            <IconButton
+                                size="large"
+                                aria-label="show more"
+                                aria-haspopup="true"
+                                onClick={handleMobileMenuOpen}
+                                color="inherit"
+                            >
+                                <MenuIcon />
+                            </IconButton>
+                            <Menu
+                                anchorEl={mobileMenuAnchorEl}
+                                open={Boolean(mobileMenuAnchorEl)}
+                                onClose={handleMobileMenuClose}
+                            >
+                                <MenuItem onClick={() => navigate('/history')}>History</MenuItem>
+                                <MenuItem onClick={() => navigate('/favorite')}>Favorites</MenuItem>
+                                <MenuItem onClick={() => navigate('/profile')}>Profile</MenuItem>
+                            </Menu>
+                        </Box>
+                    ) : (
+                        <>
+                            <Button color="inherit" onClick={() => navigate('/history')}>
+                                History
+                            </Button>
+                            <Button color="inherit" onClick={() => navigate('/favorite')}>
+                                Favorites
+                            </Button>
+                            <Box>
+                                <IconButton
+                                    size="large"
+                                    edge="end"
+                                    aria-label="account of current user"
+                                    aria-haspopup="true"
+                                    color="inherit"
+                                    onClick={() => { navigate('/profile') }}
+                                >
+                                    <AccountCircle />
+                                </IconButton>
+                            </Box>
+                        </>
+                    )}
                 </Toolbar>
             </AppBar>
             <Menu
@@ -157,7 +192,7 @@ const PrimarySearchAppBar = () => {
                 }}
             >
                 {results.map((result) => (
-                    <MenuItem key={result.id} onClick={() => handleMenuItemClick(result.id , result.original_title)}>
+                    <MenuItem key={result.id} onClick={() => handleMenuItemClick(result.id, result.original_title)}>
                         {result.original_title}
                     </MenuItem>
                 ))}
